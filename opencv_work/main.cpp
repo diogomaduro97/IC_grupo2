@@ -6,6 +6,7 @@
 using namespace cv;
 using namespace std;
 
+#define WAIT_KEY 1          //0 para imagem e 1 para video
 #define COLOR_CHANNELS 3
 #define IMG_COLOR -1
 #define HISTO_BITSCAPTURE 5 // quanto maior o numero menos pixeis sao contados para o hitograma, mais rapida e a captura de ecra
@@ -55,7 +56,7 @@ Mat imageHisto(vector<map<short,int>> histo){
     {
         for (int value = 0; value < histo[i].size(); value=value+HISTO_NUMCOLLUMS)
         {
-            rectangle(histogram_image, Point((HISTO_SIZE*i) + 2*value, histogram_image.rows - histo[i][value]), 
+            rectangle(histogram_image, Point((HISTO_SIZE*i) + 2*value, histogram_image.rows - (histo[i][value] >> 1)), 
                 Point((HISTO_SIZE*i) + 2*(value+1), histogram_image.rows),Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
         }
          
@@ -71,15 +72,16 @@ int main(int argc, char** argv )
         printf("usage: DisplayImage.out <Image_Path>\n");
         return -1;
     } */
-    // Mat image = imread("cao.jpg", IMG_COLOR );
     VideoCapture cap(0);
     Mat image;
+    // Mat image = imread("gaja.jpg", IMG_COLOR );
     // string file = "histo.txt";
-    // histoToFile(file,histo);
     while(1)
     {
         cap.read(image);
+
         vector<map<short,int>> histo = createHistogram(image);
+        // histoToFile(file,histo);
         Mat histo_image = imageHisto(histo);
         
         namedWindow("Histogram", WINDOW_AUTOSIZE );
@@ -92,7 +94,7 @@ int main(int argc, char** argv )
         }
         namedWindow("Display Image", WINDOW_AUTOSIZE );
         imshow("Display Image", image);
-        waitKey(5);
+        waitKey(WAIT_KEY);
     }
     return 0;
 } 
