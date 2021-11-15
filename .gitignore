@@ -2,3 +2,11 @@
 Audio_work/AudioFile
 opencv_work/.vscode
 opencv_work/build
+AudioFile-master
+opencv_work/CMakeFiles
+opencv_work/cmake_install.cmake
+opencv_work/CMakeCache.txt
+opencv_work/CTestTestfile.cmake
+opencv_work/DartConfiguration.tcl
+opencv_work/Makefile
+opencv_work/opencvTest
