@@ -6,8 +6,7 @@
 #include <map>
 #include <opencv2/opencv.hpp>
 // using namespace wave;
-#define DECIMAL_SPACES 10000
-#define LOG_BASE log(DECIMAL_SPACES * 2)
+#define DECIMAL_SPACES 1000
 #define WAIT_KEY 0          //0 para imagem e 1 para video
 #define HISTO_WINDOWSIZE_Y 1000
 #define HISTO_WINDOWSIZE_X 1500
@@ -71,6 +70,7 @@ AudioFile<double>::AudioBuffer fillbuffer(AudioFile<double> audioFile){
         double temp = (double)a/DECIMAL_SPACES;
         histo[channel][temp]++;
         buffer[channel][i] = temp;
+       
     }
   }
   return buffer;
@@ -112,10 +112,8 @@ int main(int argc, char** argv) {
     audioFile.printSummary();
     printf("ficheiro de saida : %s \n", fileOut);
     audioFileOut.printSummary();
-    cout << "lol2" << endl;
     vector<double> entropy = histoEntropy(numChannels,audioFile.getNumSamplesPerChannel());
     Mat histo_image = imageHisto(entropy);
-    cout << "lol3" << endl;
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     imshow("Histogram", histo_image);
     imwrite("../histo.jpg", histo_image);

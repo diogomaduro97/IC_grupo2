@@ -6,7 +6,6 @@
 #include <math.h>
 using namespace cv;
 using namespace std;
-#define LOG_BASE log(256)
 #define WAIT_KEY 0          //0 para imagem e 1 para video
 #define COLOR_CHANNELS 3
 #define IMG_COLOR -1
@@ -14,7 +13,7 @@ using namespace std;
 #define HISTO_WINDOWSIZE_Y 1000
 #define HISTO_WINDOWSIZE_X 1920
 #define HISTO_SIZE 530
-#define RECTANGLE_SIZE 3 // quanto maior o numero menor o tamanho do rectagulo
+#define RECTANGLE_SIZE 2 // quanto maior o numero menor o tamanho do rectagulo
 map<short,int>::iterator it;
 vector<map<short,int>> createHistogram(Mat image){
     vector<map<short,int>> histo;
@@ -69,7 +68,7 @@ vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     for(int i = 0; i < histo.size(); i++){
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
             double prob = (double)it->second/((double)sample_size*HISTO_BITSCAPTURE);
-            entropy[i] = entropy[i] - prob*(log(prob)/LOG_BASE);
+            entropy[i] = entropy[i] - prob*log(prob);
         }
     }
     return entropy;
@@ -83,6 +82,7 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
         return -1;
     } */
     Mat image = imread("cao.jpg", IMG_COLOR );
+    Mat imagemout();
     string file = "histo.txt";
 
     vector<map<short,int>> histo = createHistogram(image);
