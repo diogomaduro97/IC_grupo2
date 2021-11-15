@@ -22,12 +22,9 @@ vector<map<short,int>> createHistogram(Mat image){
         map<short,int> mapa;
         histo.push_back(mapa);
     }
-    for (int r = 0; r < image.rows; r++)
-    {
-        for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE)
-        {
-            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++)
-            {
+    for (int r = 0; r < image.rows; r++){
+        for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
+            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
                 short temp = image.at<Vec3b>(r,c)[channel];            
                 // cout << image.at<Vec3b>(r,c)[i] << ",";
                 if(it == histo[channel].end()) histo[channel][temp]=0;
@@ -54,44 +51,31 @@ void histoToFile(string file, vector<map<short,int>> histo){
 Mat imageHisto(vector<map<short,int>> histo,vector<double> entropy){
     Mat histogram_image(HISTO_WINDOWSIZE_Y, HISTO_WINDOWSIZE_X,CV_8UC3, Scalar(0,0,0));
 
-    cout << "i am fine5" << endl;
-    for (int i = 0; i < histo.size(); i++)
-    {
-        for (int value = 0; value < histo[i].size(); value=value+HISTO_NUMCOLLUMS)
-        {
+    for (int i = 0; i < histo.size(); i++){
+        for (int value = 0; value < histo[i].size(); value=value+HISTO_NUMCOLLUMS){
             rectangle(histogram_image, Point((HISTO_SIZE*i) + 2*value, histogram_image.rows - (histo[i][value] >> 3)), 
                 Point((HISTO_SIZE*i) + 2*(value+1), histogram_image.rows),Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
         }
         const string toprint = to_string(entropy[i]);
         putText(histogram_image, toprint , Point(250 + (HISTO_SIZE*i) , 200), FONT_HERSHEY_COMPLEX_SMALL ,0.8, Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
-         
     }
-    cout << "i am fine6" << endl;
     return histogram_image;
 }
 vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     vector<double> entropy;
-    // cout << "i am fine" << endl;
     for(int i=0 ; i < COLOR_CHANNELS; i++){
         double tmp = 0;
         entropy.push_back(tmp);
     }
-    for(int i = 0; i < histo.size(); i++)
-    {
-        
-        for (int j = 0; j < histo[i].size(); j++)
-        {
-            // cout << entropy[i] << endl;
+    for(int i = 0; i < histo.size(); i++){
+        for (int j = 0; j < histo[i].size(); j++){
             double prob = (double)histo[i][j]/(double)sample_size;
-            // cout << prob<< endl;
             entropy[i] = entropy[i] - prob*((prob ? log(prob) : 0)/log(histo[i].size()));
-            
         }
-        
     }
     return entropy;
 }
-int main(int argc, char** argv )
+int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY diferente de 0)
 {
     /* 
     if ( argc != 2 )
@@ -106,7 +90,6 @@ int main(int argc, char** argv )
     histoToFile(file,histo);
 
     vector<double> entropy = histoEntropy(histo,image.rows*image.cols/HISTO_BITSCAPTURE);
-    cout << entropy[0] << endl;
     Mat histo_image = imageHisto(histo,entropy);
     
     namedWindow("Histogram", WINDOW_AUTOSIZE );
@@ -122,7 +105,7 @@ int main(int argc, char** argv )
     
     return 0;
 } 
-// int main(int argc, char** argv )
+// int main(int argc, char** argv )  // main para usar webcam (meter WAIT_KEY diferente de 0)
 // {
 //     /* 
 //     if ( argc != 2 )
