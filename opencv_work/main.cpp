@@ -6,8 +6,9 @@
 #include <math.h>
 using namespace cv;
 using namespace std;
+#define LOG_BASE log(2)
 #define WAIT_KEY 0          //0 para imagem e 1 para video
-#define COLOR_CHANNELS 3
+#define COLOR_CHANNELS 4
 #define IMG_COLOR -1
 #define HISTO_BITSCAPTURE 1 // quanto maior o numero menos pixeis sao contados para o hitograma, mais rapida e a captura de ecra
 #define HISTO_WINDOWSIZE_Y 1000
@@ -24,7 +25,7 @@ vector<map<short,int>> createHistogram(Mat image){
     for (int r = 0; r < image.rows; r++){
         for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
             for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
-                short temp = image.at<Vec3b>(r,c)[channel];            
+                short temp = image.at<Vec4b>(r,c)[channel];            
                 // cout << image.at<Vec3b>(r,c)[i] << ",";
                 histo[channel][temp] = histo[channel][temp] + HISTO_BITSCAPTURE;
             }
@@ -82,9 +83,29 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
         return -1;
     } */
     Mat image = imread("cao.jpg", IMG_COLOR );
-    Mat imagemout();
+    Mat imagemout(image.rows, image.cols,CV_8UC3, Scalar(0,0,0));
     string file = "histo.txt";
 
+    for (int r = 0; r < image.rows; r++){
+        for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
+            // cout << "(" << image.at<Vec3b>(r,c) <<") | ";
+            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
+                imagemout.at<Vec4b>(r,c)[channel] = image.at<Vec4b>(r,c)[channel] >> 4;            
+            }
+        }
+        // cout << ";" <<endl;
+    }
+    Mat imagemout2(image.rows, image.cols,CV_8UC3, Scalar(0,0,0));
+    
+
+    for (int r = 0; r < image.rows; r++){
+        for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
+            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
+                imagemout2.at<Vec4b>(r,c)[channel] = imagemout.at<Vec4b>(r,c)[channel] << 4;            
+            }
+        }
+        // cout << ";" <<endl;
+    }
     vector<map<short,int>> histo = createHistogram(image);
     histoToFile(file,histo);
 
@@ -98,9 +119,15 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
         printf("No image data \n");
         return -1; 
     }
+    namedWindow("Display ImageOut", WINDOW_AUTOSIZE );
+    imshow("Display ImageOut", imagemout);
+    namedWindow("Display ImageOut2", WINDOW_AUTOSIZE );
+    imshow("Display ImageOut2", imagemout2);
     namedWindow("Display Image", WINDOW_AUTOSIZE );
+    imwrite("imagemout2.jpg", imagemout2);
     imshow("Display Image", image);
     imwrite("histo.jpg", histo_image);
+    imwrite("imagem.jpg", image);
     waitKey(WAIT_KEY);
     
     return 0;
