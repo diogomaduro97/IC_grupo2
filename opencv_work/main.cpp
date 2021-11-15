@@ -141,24 +141,3 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
 //     }
 //     return 0;
 // } 
-
-
-
-
-
-/* int main(){
-    VideoCapture cap(0);
-    Mat image;
-    Mat imgGrey, imgGranny;
-    while(1){
-        
-        cap.read(image);
-        cvtColor(image, imgGrey ,COLOR_BGR2GRAY);
-        Canny(imgGrey,imgGranny,150,200);
-        imshow("Image", image);
-        imshow("Image Grey", imgGrey);
-        
-        imshow("Image Canny", imgGranny);
-        waitKey(20);
-    }
-} */
