@@ -75,7 +75,7 @@ vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     }
     return entropy;
 }
-int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY diferente de 0)
+int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
 {
     /* 
     if ( argc != 2 )
