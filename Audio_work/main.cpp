@@ -77,7 +77,7 @@ AudioFile<double>::AudioBuffer fillbuffer(AudioFile<double> audioFile){
   return buffer;
 }
 void histoToFile(int numChannels){
-    ofstream ofs("histo.txt");
+    ofstream ofs("../histo.txt");
     for(int i = 0; i< numChannels; i++){
         ofs << "canal numero: " << i << endl;
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
@@ -87,8 +87,8 @@ void histoToFile(int numChannels){
     }
 }
 int main(int argc, char** argv) {
-    const char* fileIn = argc > 1? argv[1]:"8k8bitpcm.wav";
-    const char* fileOut = argc > 2? argv[2]:"out.wav";
+    const char* fileIn = argc > 1? argv[1]:"../../Wav files-20211025/sample01.wav";
+    const char* fileOut = argc > 2? argv[2]:"../out.wav";
     
     AudioFile<double> audioFile;
     audioFile.load(fileIn);
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
     cout << "lol3" << endl;
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     imshow("Histogram", histo_image);
-    imwrite("histo.jpg", histo_image);
+    imwrite("../histo.jpg", histo_image);
     waitKey(WAIT_KEY);
     return 0;
 }

@@ -11,3 +11,6 @@ opencv_work/DartConfiguration.tcl
 opencv_work/Makefile
 opencv_work/opencvTest
 Audio_work/build
+Audio_work/histo.txt
+Audio_work/histo.jpg
+Audio_work/out.wav
