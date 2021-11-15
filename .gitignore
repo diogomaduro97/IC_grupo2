@@ -10,6 +10,7 @@ opencv_work/CTestTestfile.cmake
 opencv_work/DartConfiguration.tcl
 opencv_work/Makefile
 opencv_work/opencvTest
+opencv_work/histo.jpg
 Audio_work/build
 Audio_work/histo.txt
 Audio_work/histo.jpg

@@ -6,11 +6,12 @@
 #include <map>
 #include <opencv2/opencv.hpp>
 // using namespace wave;
-#define DECIMAL_SPACES 1000
+#define DECIMAL_SPACES 10000
+#define LOG_BASE log(DECIMAL_SPACES * 2)
 #define WAIT_KEY 0          //0 para imagem e 1 para video
-#define IMG_COLOR -1
 #define HISTO_WINDOWSIZE_Y 1000
 #define HISTO_WINDOWSIZE_X 1500
+#define RECTANGLE_SIZE 3
 #define HISTO_SIZE 530
 #define HISTO_NUMCOLLUMS 1 //quanto maior for o numero, menos colunas aparecem
 using namespace std;
@@ -22,7 +23,7 @@ Mat imageHisto(vector<double> entropy){
 
     for (int i = 0; i < histo.size(); i++){
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
-            rectangle(histogram_image, Point((HISTO_SIZE*i) +  2*((it->first+1)*250) , histogram_image.rows - (it->second >> 4)), 
+            rectangle(histogram_image, Point((HISTO_SIZE*i) +  2*((it->first+1)*250) , histogram_image.rows - (it->second >> RECTANGLE_SIZE)), 
                 Point((HISTO_SIZE*i) + 2*((it->first+1)*250+1), histogram_image.rows),Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
         }
         const string toprint = to_string(entropy[i]);
@@ -68,8 +69,6 @@ AudioFile<double>::AudioBuffer fillbuffer(AudioFile<double> audioFile){
         tmp = audioFile.samples[channel][i];
         int a = tmp*DECIMAL_SPACES;
         double temp = (double)a/DECIMAL_SPACES;
-        histo[channel].find(temp); 
-        if(it == histo[channel].end()) histo[channel][temp]=0;
         histo[channel][temp]++;
         buffer[channel][i] = temp;
     }
