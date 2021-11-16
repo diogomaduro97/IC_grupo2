@@ -11,6 +11,11 @@ opencv_work/DartConfiguration.tcl
 opencv_work/Makefile
 opencv_work/opencvTest
 opencv_work/histo.jpg
+opencv_work/histo_out.jpg
+opencv_work/out.jpg
+opencv_work/Images_Out/*.jpg
+opencv_work/Histograms/*.jpg
+opencv_work/Histograms/*.txt
 Audio_work/build
 Audio_work/histo.txt
 Audio_work/histo.jpg
