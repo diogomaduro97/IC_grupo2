@@ -7,13 +7,13 @@
 using namespace cv;
 using namespace std;
 #define WAIT_KEY 0          //0 para imagem e 1 para video
-#define COLOR_CHANNELS 4
+#define COLOR_CHANNELS 3
 #define IMG_COLOR 0
 #define HISTO_BITSCAPTURE 1 // quanto maior o numero menos pixeis sao contados para o hitograma, mais rapida e a captura de ecra
 #define HISTO_WINDOWSIZE_Y 1000
-#define HISTO_WINDOWSIZE_X 2300
+#define HISTO_WINDOWSIZE_X 1920
 #define HISTO_SIZE 510
-#define RECTANGLE_SIZE 2 // quanto maior o numero menor o tamanho do rectagulo
+#define RECTANGLE_DIVIDER 2 // quanto maior o numero menor o tamanho do rectagulo
 #define SHIFT_BITS 2
 map<short,int>::iterator it;
 vector<map<short,int>> createHistogram(Mat image){
@@ -25,7 +25,7 @@ vector<map<short,int>> createHistogram(Mat image){
     for (int r = 0; r < image.rows; r++){
         for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
             for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
-                short temp = image.at<Vec4b>(r,c)[channel];            
+                short temp = image.at<Vec3b>(r,c)[channel];            
                 // cout << image.at<Vec3b>(r,c)[i] << ",";
                 histo[channel][temp] = histo[channel][temp] + HISTO_BITSCAPTURE;
             }
@@ -46,13 +46,12 @@ void histoToFile(string file, vector<map<short,int>> histo){
     }
 
 }
-
-Mat imageHisto(vector<map<short,int>> histo,vector<double> entropy){
+Mat imageHisto(vector<map<short,int>> histo,vector<double> entropy, uint8_t ractangle_divider = RECTANGLE_DIVIDER){
     Mat histogram_image(HISTO_WINDOWSIZE_Y, HISTO_WINDOWSIZE_X,CV_8UC3, Scalar(0,0,0));
 
     for (int i = 0; i < histo.size(); i++){
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
-            rectangle(histogram_image, Point((HISTO_SIZE*i) + 2*it->first, histogram_image.rows - (it->second >>RECTANGLE_SIZE)), 
+            rectangle(histogram_image, Point((HISTO_SIZE*i) + 2*it->first, histogram_image.rows - (it->second >> ractangle_divider)), 
                 Point((HISTO_SIZE*i) + 2*(it->first+1), histogram_image.rows),i <3 ? Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0):Scalar(255,255,255));
         }
         const string toprint = to_string(entropy[i]);
@@ -74,18 +73,13 @@ vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     }
     return entropy;
 }
-void saveImage(string path,Mat image){
-    namedWindow(path, WINDOW_AUTOSIZE );
-    imshow(path, image);
-    imwrite(path, image);
-}
 Mat compress(Mat image, int color = IMG_COLOR ,uint8_t bits=SHIFT_BITS){
     Mat image_compressed(image.rows,image.cols,CV_8UC3,Scalar(0,0,0));
     // if(color != 0){
         for (int r = 0; r < image.rows; r++){
             for (int c = 0; c < image.cols; c++){
                 for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
-                    image_compressed.at<Vec4b>(r,c)[channel] = image.at<Vec4b>(r,c)[channel]>>bits;            
+                    image_compressed.at<Vec3b>(r,c)[channel] = image.at<Vec3b>(r,c)[channel]>>bits;            
                 }
             }
         }
@@ -104,7 +98,7 @@ Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
         for (int r = 0; r < image.rows; r++){
             for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
                 for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
-                    image_decompressed.at<Vec4b>(r,c)[channel] = image.at<Vec4b>(r,c)[channel] << bits;            
+                    image_decompressed.at<Vec3b>(r,c)[channel] = image.at<Vec3b>(r,c)[channel]<<bits;            
                 }
             }
         }
@@ -117,7 +111,6 @@ Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
     // }
     return image_decompressed;
 }
-
 vector<double> signalToNoise(Mat image1, Mat image2){
     vector<double> sums;
     for(int i=0 ; i < COLOR_CHANNELS; i++){
@@ -127,7 +120,7 @@ vector<double> signalToNoise(Mat image1, Mat image2){
     for (int r = 0; r < image1.rows; r++){
         for (int c = 0; c < image2.cols; c++){
             for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
-                sums[channel] = sums[channel] + pow(image1.at<Vec4b>(r,c)[channel] - image2.at<Vec4b>(r,c)[channel],2);
+                sums[channel] = sums[channel] + pow(image1.at<Vec3b>(r,c)[channel] - image2.at<Vec3b>(r,c)[channel],2);
                 
             }
         }
@@ -140,19 +133,20 @@ vector<double> signalToNoise(Mat image1, Mat image2){
     }
     return psnr;
 }
+void saveImage(string path,Mat image, uint8_t show = 1 ){
+    if(show){
+        namedWindow(path, WINDOW_AUTOSIZE );
+        imshow(path, image);
+    }
+    imwrite(path, image);
+}
 int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
 {
-    /* 
-    if ( argc != 2 )
-    {
-        printf("usage: DisplayImage.out <Image_Path>\n");
-        return -1;
-    } */
-    Mat image = imread("gaja.jpg");
-    Mat imagemout = compress(image);
-    Mat imagemout2 = decompress(imagemout);
+    Mat image = imread(argc!=2 ?"../cao.jpg":argv[1]);
+    Mat image_compressed = compress(image);
+    Mat image_decompressed = decompress(image_compressed);
     string file = "histo.txt";
-    vector<double> snr = signalToNoise(image, imagemout2);
+    vector<double> snr = signalToNoise(image, image_decompressed);
     for(int i = 0; i < snr.size(); i++){
         cout << snr[i] << endl;
     }
@@ -160,17 +154,23 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
     vector<map<short,int>> histo = createHistogram(image);
     histoToFile(file,histo);
     vector<double> entropy = histoEntropy(histo,image.rows*image.cols/HISTO_BITSCAPTURE);
-
     Mat histo_image = imageHisto(histo,entropy);
+
+    
+    vector<map<short,int>> histoOut = createHistogram(image_decompressed);
+    histoToFile(file,histo);
+    vector<double> entropyOut = histoEntropy(histoOut,image_decompressed.rows*image_decompressed.cols/HISTO_BITSCAPTURE);
+    Mat histo_image_decompressed = imageHisto(histoOut,entropyOut,5);
+    
     if ( !image.data )
     {
         printf("No image data \n");
         return -1; 
     }
-    saveImage("imagem.jpg", image);
-    saveImage("imagemou1.jpg", imagemout);
-    saveImage("imagemout2.jpg", imagemout2);
+    // saveImage("imagem.jpg", image);
+    saveImage(argc!=3 ?"../out.jpg":argv[2], image_decompressed);
     saveImage("histo.jpg", histo_image);
+    saveImage("histo_out.jpg", histo_image_decompressed);
 
     waitKey(WAIT_KEY);
     
