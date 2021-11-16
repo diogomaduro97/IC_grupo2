@@ -117,6 +117,29 @@ Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
     // }
     return image_decompressed;
 }
+
+vector<double> signalToNoise(Mat image1, Mat image2){
+    vector<double> sums;
+    for(int i=0 ; i < COLOR_CHANNELS; i++){
+        double sum = 0;
+        sums.push_back(sum);
+    }
+    for (int r = 0; r < image1.rows; r++){
+        for (int c = 0; c < image2.cols; c++){
+            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
+                sums[channel] = sums[channel] + pow(image1.at<Vec4b>(r,c)[channel] - image2.at<Vec4b>(r,c)[channel],2);
+                
+            }
+        }
+    }
+    
+    vector<double> psnr;
+    for(int i=0 ; i < COLOR_CHANNELS; i++){
+        double snr = 10*log10(pow(256,2)*image1.rows*image1.cols/sums[i]);
+        psnr.push_back(snr);
+    }
+    return psnr;
+}
 int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
 {
     /* 
@@ -129,8 +152,10 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
     Mat imagemout = compress(image);
     Mat imagemout2 = decompress(imagemout);
     string file = "histo.txt";
-
-    
+    vector<double> snr = signalToNoise(image, imagemout2);
+    for(int i = 0; i < snr.size(); i++){
+        cout << snr[i] << endl;
+    }
     
     vector<map<short,int>> histo = createHistogram(image);
     histoToFile(file,histo);
