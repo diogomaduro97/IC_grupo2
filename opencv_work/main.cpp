@@ -6,25 +6,23 @@
 #include <math.h>
 using namespace cv;
 using namespace std;
-#define WAIT_KEY 0          //0 para imagem e 1 para video
+#define WAIT_KEY 1          //0 para imagem e 1 para video
 #define COLOR_CHANNELS 3    
 #define IMG_COLOR -1
 #define HISTO_BITSCAPTURE 1 // quanto maior o numero menos pixeis sao contados para o hitograma, mais rapida e a captura de ecra
 #define HISTO_WINDOWSIZE_Y 1000
 #define HISTO_WINDOWSIZE_X 1920
-#define HISTO_SIZE 510       
+#define HISTO_SIZE 510      // 
 #define RECTANGLE_DIVIDER 2 // quanto maior o numero menor o tamanho do rectagulo
-#define SHIFT_BITS 2        // [0..7] qunato bits se filtram por cada pixel 
+#define SHIFT_BITS 5        // [0..7] qunato bits se filtram por cada pixel 
 map<short,int>::iterator it;
 vector<map<short,int>> createHistogram(Mat image){
     vector<map<short,int>> histo;
-    for(int i=0 ; i < COLOR_CHANNELS; i++){
+    for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
         map<short,int> mapa;
         histo.push_back(mapa);
-    }
-    for (int r = 0; r < image.rows; r++){
-        for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
-            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
+        for (int r = 0; r < image.rows; r++){
+            for (int c = r%HISTO_BITSCAPTURE; c < image.cols; c=c+HISTO_BITSCAPTURE){
                 short temp = image.at<Vec3b>(r,c)[channel];            
                 // cout << image.at<Vec3b>(r,c)[i] << ",";
                 histo[channel][temp] = histo[channel][temp] + HISTO_BITSCAPTURE;
@@ -70,11 +68,9 @@ Mat snrOnHisto(Mat histo,vector<double> snr ){
 }
 vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     vector<double> entropy;
-    for(int i=0 ; i < COLOR_CHANNELS; i++){
+    for(int i = 0; i < histo.size(); i++){
         double tmp = 0;
         entropy.push_back(tmp);
-    }
-    for(int i = 0; i < histo.size(); i++){
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
             double prob = (double)it->second/((double)sample_size*HISTO_BITSCAPTURE);
             entropy[i] = entropy[i] - prob*log(prob);
@@ -122,22 +118,17 @@ Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
 }
 vector<double> signalToNoise(Mat image1, Mat image2){
     vector<double> sums;
-    for(int i=0 ; i < COLOR_CHANNELS; i++){
+    vector<double> psnr;
+    for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
         double sum = 0;
         sums.push_back(sum);
-    }
-    for (int r = 0; r < image1.rows; r++){
-        for (int c = 0; c < image2.cols; c++){
-            for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
+        for (int r = 0; r < image1.rows; r++){
+            for (int c = 0; c < image2.cols; c++){
                 sums[channel] = sums[channel] + pow(image1.at<Vec3b>(r,c)[channel] - image2.at<Vec3b>(r,c)[channel],2);
                 
             }
         }
-    }
-    
-    vector<double> psnr;
-    for(int i=0 ; i < COLOR_CHANNELS; i++){
-        double snr = 10*log10(pow(256,2)*image1.rows*image1.cols/sums[i]);
+        double snr = 10*log10(pow(256,2)*image1.rows*image1.cols/sums[channel]);
         psnr.push_back(snr);
     }
     return psnr;
@@ -177,7 +168,6 @@ int main(int argc, char** argv ) // main para usar imagens (meter WAIT_KEY a 0)
     saveImage(argc!=3 ?"../Images_Out/out.jpg":argv[2], image_decompressed);
     saveImage("../Histograms/histo.jpg", histo_image);
     saveImage("../Histograms/histo_out.jpg", histo_image_decompressed);
-
     waitKey(WAIT_KEY);
     
     return 0;
