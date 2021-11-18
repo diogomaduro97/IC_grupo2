@@ -13,11 +13,12 @@ opencv_work/opencvTest
 opencv_work/histo.jpg
 opencv_work/histo_out.jpg
 opencv_work/out.jpg
-opencv_work/Images_Out/*.jpg
-opencv_work/Histograms/*.jpg
-opencv_work/Histograms/*.txt
 Audio_work/build
 Audio_work/histo.txt
 Audio_work/histo.jpg
 Audio_work/out.wav
+Audio_work/histo_decompressed.jpg
+Audio_work/out_compressed.wav
+Audio_work/out_decompressed.wav
+test
 Delivery/ex4/build
