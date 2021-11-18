@@ -159,6 +159,15 @@ void histoToFile(vector<map<double,int>> histo,int numChannels){
         }
     }
 }
+/* 
+    function to shift the value of each sample to the right
+    input args: 
+        - AudioFile<double> audioFile       -> Audio file from a track 
+        - uint8_t bits                      -> number of bits to shift right 
+    output:
+        - AudioFile<double> audio_compress  -> Audio file with bits reduced 
+
+*/
 AudioFile<double> compress(AudioFile<double> audio, uint8_t bits=SHIFT_BITS){
     AudioFile<double> audioOut;
     audioOut.setBitDepth(audio.getBitDepth());
@@ -177,6 +186,15 @@ AudioFile<double> compress(AudioFile<double> audio, uint8_t bits=SHIFT_BITS){
     
     return audioOut;
 }
+/* 
+    function to shift the value of each sample to the left
+    input args: 
+        - AudioFile<double> audioFile       -> Audio file from a track 
+        - uint8_t bits                      -> number of bits to shift right 
+    output:
+        - AudioFile<double> audio_decompress  -> Audio file with bits gained 
+
+*/
 AudioFile<double> decompress(AudioFile<double> audio, uint8_t bits=SHIFT_BITS){
     AudioFile<double> audioOut;
     audioOut.setBitDepth(audio.getBitDepth());
@@ -195,6 +213,14 @@ AudioFile<double> decompress(AudioFile<double> audio, uint8_t bits=SHIFT_BITS){
     }
     return audioOut;
 }
+/* 
+    function to calculate the peak of signal to noise between an original audio and the altered audio
+    input args: 
+        - AudioFile<double> audio1       -> Audio file Original 
+        - AudioFile<double> audio2       -> Audio file Altered 
+    output:
+        -vector<double> psnr        -> vector with the psnr calculated for each channel 
+*/
 vector<double> signalToNoise(AudioFile<double> audio1, AudioFile<double> audio2){
     vector<double> sums;
     vector<double> psnr;

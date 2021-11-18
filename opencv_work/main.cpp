@@ -16,6 +16,13 @@ using namespace std;
 #define RECTANGLE_DIVIDER 2 // quanto maior o numero menor o tamanho do rectagulo
 #define SHIFT_BITS 5        // [0..7] qunato bits se filtram por cada pixel 
 map<short,int>::iterator it;
+/* 
+    this function generate a histogram from an audioFile   
+    input args: 
+        - ;at image                     ->  Image file to be computed 
+    output:
+        - vector<map<short,int>> histo  ->  the histogram calculated
+*/
 vector<map<short,int>> createHistogram(Mat image){
     vector<map<short,int>> histo;
     for (size_t channel = 0; channel < COLOR_CHANNELS; channel++){
@@ -33,6 +40,11 @@ vector<map<short,int>> createHistogram(Mat image){
     }
     return histo;
 }
+/* 
+    this function generate a text file with the histogram\s
+    input args: 
+        - vector<map<double,int>> histo -> Histogram of the image 
+*/
 void histoToFile(string file, vector<map<short,int>> histo){
     ofstream ofs(file);
     for(int i = 0; i< COLOR_CHANNELS; i++){
@@ -44,6 +56,14 @@ void histoToFile(string file, vector<map<short,int>> histo){
     }
 
 }
+/* 
+    this function generate an image based on a histogram and his entropy
+    input args: 
+        - vector<map<short,int>> histo -> Histogram of the audiotrack  
+        - vector<double> entropy        -> Entropy calculated based on the histogram 
+    output:
+        - Mat histogram_image ->  image's matrix of the histogram generated  
+*/
 Mat imageHisto(vector<map<short,int>> histo,vector<double> entropy,uint8_t ractangle_divider = RECTANGLE_DIVIDER){
     Mat histogram_image(HISTO_WINDOWSIZE_Y, HISTO_WINDOWSIZE_X,CV_8UC3, Scalar(0,0,0));
 
@@ -58,6 +78,13 @@ Mat imageHisto(vector<map<short,int>> histo,vector<double> entropy,uint8_t racta
     }
     return histogram_image;
 }
+/* 
+    this function add the snr value to the generated histogram image 
+    input args:   
+        - vector<double> snr  -> Snr calculated from an altered image 
+    output:
+        - Mat histogram_image ->  image's matrix of the histogram generated with snr value added  
+*/
 Mat snrOnHisto(Mat histo,vector<double> snr ){
     for (int i = 0; i < COLOR_CHANNELS; i++){
         const string toprint = to_string(snr[i]);
@@ -66,6 +93,14 @@ Mat snrOnHisto(Mat histo,vector<double> snr ){
     }
     return histo;
 }
+/* 
+    function to calculate the entropy of a histogram from an Image
+    input args: 
+        -vector<map<short,int>> histo -> the histogram calculated with the function createHIstogram 
+        -int Sample_size                -> number of samples of the audiofile 
+    output:
+        -vector<double> entropy        -> vector with the entropy calculated for each color
+*/
 vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     vector<double> entropy;
     for(int i = 0; i < histo.size(); i++){
@@ -78,6 +113,15 @@ vector<double> histoEntropy(vector<map<short,int>> histo, int sample_size ){
     }
     return entropy;
 }
+/* 
+    function to shift the value of each pixel to the right
+    input args: 
+        - Mat Image             -> Image file from a track 
+        - uint8_t bits          -> number of bits to shift right 
+    output:
+        - Mat audio_decompress  -> Audio file with bits reduced 
+
+*/
 Mat compress(Mat image, int color = IMG_COLOR ,uint8_t bits=SHIFT_BITS){
     Mat image_compressed(image.rows,image.cols,CV_8UC3,Scalar(0,0,0));
     // if(color != 0){
@@ -97,6 +141,15 @@ Mat compress(Mat image, int color = IMG_COLOR ,uint8_t bits=SHIFT_BITS){
     // }
     return image_compressed;
 }
+/* 
+    function to shift the value of each pixel to the left
+    input args: 
+        - Mat Image             -> Image file from a track 
+        - uint8_t bits          -> number of bits to shift right 
+    output:
+        - Mat audio_decompress  -> Audio file with bits gained 
+
+*/
 Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
     Mat image_decompressed(image.rows,image.cols,CV_8UC3,Scalar(0,0,0));
     // if(color != 0){
@@ -116,6 +169,14 @@ Mat decompress(Mat image,int color = IMG_COLOR, uint8_t bits=SHIFT_BITS){
     // }
     return image_decompressed;
 }
+/* 
+    function to calculate the peak of signal to noise between an original image and the altered image
+    input args: 
+        - Mat image1       -> image file Original 
+        - Mat image2       -> image file Altered 
+    output:
+        -vector<double> psnr        -> vector with the PSNR calculated for each channel 
+*/
 vector<double> signalToNoise(Mat image1, Mat image2){
     vector<double> sums;
     vector<double> psnr;
