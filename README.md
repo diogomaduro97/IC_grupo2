@@ -11,6 +11,12 @@
 	-Needs Opencv and Adam Stark's AudioFile library installed, the later needs to be installed in the Audio_work directory
 
 ## How to run
+### text_work:
+		$ cd text_work
+		$ mkdir build && cd build
+		$ cmake ../
+		$ make
+		$ ./Test [arg1][arg2]
 
 ### Audio_work:
   
