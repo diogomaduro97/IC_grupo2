@@ -16,7 +16,7 @@
 		$ mkdir build && cd build
 		$ cmake ../
 		$ make
-		$ ./Test [arg1][arg2]
+		$ ./test [arg1][arg2]
 
 ### Audio_work:
   
