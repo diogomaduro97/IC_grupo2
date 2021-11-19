@@ -14,7 +14,7 @@
 #define RECTANGLE_DIVIDER 0
 #define HISTO_SIZE 600
 #define HISTO_NUMCOLLUMS 1 //quanto maior for o numero, menos colunas aparecem
-#define SHIFT_BITS 15    // [0..7] qunato bits se filtram por cada pixel 
+#define SHIFT_BITS 13    // [0..7] qunato bits se filtram por cada pixel 
 using namespace std;
 using namespace cv;
 map<double,int>::iterator it;
@@ -130,18 +130,24 @@ vector<double> histoEntropy(vector<map<double,int>> histo,int numChannels, int n
     output:
         - Mat histogram_image ->  image's matrix of the histogram generated  
 */
-Mat imageHisto(vector<map<double,int>> histo,vector<double> entropy){
+Mat imageHisto(vector<map<double,int>> histo,vector<double> entropy, uint32_t rectangle_divider = RECTANGLE_DIVIDER){
     Mat histogram_image(HISTO_WINDOWSIZE_Y, HISTO_WINDOWSIZE_X,CV_8UC3, Scalar(0,0,0));
 
     for (int i = 0; i < histo.size(); i++){
         for(it = histo[i].begin(); it!=histo[i].end() ; it++ ){
-            rectangle(histogram_image, Point((HISTO_SIZE*i) +  2*((it->first+MAX_SAMPLE_SIZE)*500/(MAX_SAMPLE_SIZE*2) ) , histogram_image.rows - (it->second >> RECTANGLE_DIVIDER)), 
-                Point((HISTO_SIZE*i) + 2*((it->first+MAX_SAMPLE_SIZE)*500/(MAX_SAMPLE_SIZE*2) ), histogram_image.rows),Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
+            rectangle(histogram_image, Point((HISTO_SIZE*i) +  2*((it->first+MAX_SAMPLE_SIZE)*500/(MAX_SAMPLE_SIZE*2) ) , histogram_image.rows - (it->second >> rectangle_divider)), 
+                Point((HISTO_SIZE*i) + 2*((it->first+MAX_SAMPLE_SIZE)*500/(MAX_SAMPLE_SIZE*2) ), histogram_image.rows), Scalar(i == 1?0:255 ,i == 1?0:255,255));
         }
         const string toprint = to_string(entropy[i]);
-        putText(histogram_image, toprint , Point(250 + (HISTO_SIZE*i) , 200), FONT_HERSHEY_COMPLEX_SMALL ,0.8, Scalar(i == 0?255:0 ,i == 1?255:0,i == 2?255:0));
+        putText(histogram_image, "Entropy = " + toprint , Point(250 + (HISTO_SIZE*i) , 200), FONT_HERSHEY_COMPLEX_SMALL ,0.8, Scalar(i == 1?0:255 ,i == 1?0:255,255));
     }
     return histogram_image;
+}
+Mat snrOnHisto(Mat histo,vector<double> snr, int numChannels ){
+    for (int i = 0; i < numChannels; i++){
+        putText(histo, "Peak SignaltoNoise Ratio = " + to_string(snr[i]) , Point(250 + (HISTO_SIZE*i) , 240), FONT_HERSHEY_COMPLEX_SMALL ,0.8, Scalar(i == 1?0:255 ,i == 1?0:255,255));
+    }
+    return histo;
 }
 /* 
     this function generate a text file with the histogram\s
@@ -237,10 +243,10 @@ vector<double> signalToNoise(AudioFile<double> audio1, AudioFile<double> audio2)
     return psnr;
 }
 int main(int argc, char** argv) {
-    const char* fileIn = argc > 1? argv[1]:"../../Wav files-20211025/sample01.wav";
+    const char* fileIn = argc > 1? argv[1]:"../Wav files-20211025/sample01.wav";
     const char* fileOut = argc > 2? argv[2]:"../out.wav";
     const char* file_out_compressed = "../out_compressed.wav";
-    const char* file_out_decompressed = "../out_decompressed.wav";
+    const char* file_out_decompressed ="../out_decompressed.jpg";
     
     AudioFile<double> audioFile;
     audioFile.load(fileIn);
@@ -279,7 +285,7 @@ int main(int argc, char** argv) {
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     imshow("Histogram", histo_image);
     imwrite("../histo.jpg", histo_image);
-    Mat histo_image_decompressed = imageHisto(histo_decompressed,entropy_decompressed);
+    Mat histo_image_decompressed = snrOnHisto(imageHisto(histo_decompressed,entropy_decompressed),psnr,numChannels);
     namedWindow("Histogram Decompressed", WINDOW_AUTOSIZE);
     imshow("Histogram Decompressed", histo_image_decompressed);
     imwrite("../histo_decompressed.jpg", histo_image_decompressed);
