@@ -44,6 +44,6 @@
 		$ cmake ../
 		$ make
 		$ ./opencvTest [arg1][arg2]
-
-```
-```
+## Reference
+	https://github.com/adamstark/AudioFile
+	https://github.com/opencv/opencv
